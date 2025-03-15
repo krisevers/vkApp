@@ -1,0 +1,10 @@
+.vscode/*
+.vscode
+.build/*
+.build
+
+.test/*
+.test
+
+reference_file.cpp
+
