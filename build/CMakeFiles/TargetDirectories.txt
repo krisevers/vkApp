@@ -1,3 +1,0 @@
-/home/kris/Projects/vkApp/build/CMakeFiles/vkApp.dir
-/home/kris/Projects/vkApp/build/CMakeFiles/edit_cache.dir
-/home/kris/Projects/vkApp/build/CMakeFiles/rebuild_cache.dir
