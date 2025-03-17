@@ -1,6 +1,11 @@
 #include "shader.h"
 
 VkShaderModule createShaderModule(const std::vector<char>& code, VkDevice device) {
+
+    if (code.size() % 4 != 0) {
+        throw std::runtime_error("shader code size is not a multiple of 4!");
+    }
+
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();

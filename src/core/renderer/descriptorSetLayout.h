@@ -1,5 +1,5 @@
-#ifndef DESCRIPTORSET_H
-#define DESCRIPTORSET_H
+#ifndef DESCRIPTORSETLAYOUT_H
+#define DESCRIPTORSETLAYOUT_H
 
 #include "../globals.h"
 
@@ -8,4 +8,4 @@ void cleanupDescriptorSetLayout(VkDevice device, VkDescriptorSetLayout descripto
 
 VkDescriptorSetLayoutBinding createDescriptorSetLayoutBinding(uint32_t binding, VkDescriptorType descriptorType, uint32_t descriptorCount, VkShaderStageFlags stageFlags, VkSampler* pImmutableSamplers);
 
-#endif // DESCRIPTORSET_H
+#endif // DESCRIPTORSETLAYOUT_H

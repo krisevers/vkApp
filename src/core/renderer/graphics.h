@@ -4,8 +4,6 @@
 #include "../globals.h"
 
 struct Graphics {
-    VkShaderModule vertShaderModule;
-    VkShaderModule fragShaderModule;
     VkPipelineLayout pipelineLayout{};
     VkRenderPass renderPass;
     VkDescriptorSetLayout descriptorSetLayout;
@@ -13,6 +11,8 @@ struct Graphics {
 };
 
 VkResult createGraphicsPipeline(VkDevice device, Graphics& graphics, const std::vector<std::string>& shaderPaths);
+void cleanupGraphicsPipeline(VkDevice device, Graphics& graphics);
+
 
 VkPipelineVertexInputStateCreateInfo getVertexInput();
 VkPipelineInputAssemblyStateCreateInfo getInputAssembly();
@@ -21,9 +21,10 @@ VkPipelineRasterizationStateCreateInfo getRasterizer();
 VkPipelineMultisampleStateCreateInfo getMultisampling();
 VkPipelineColorBlendAttachmentState getColorBlendAttachment();
 VkPipelineColorBlendStateCreateInfo getColorBlending();
-VkPipelineDynamicStateCreateInfo getDynamicState();
 VkPipelineDepthStencilStateCreateInfo getDepthStencil();
 VkPipelineLayoutCreateInfo getPipelineLayoutInfo(VkDescriptorSetLayout& descriptorSetLayout);
+
+//----------------------------------------------------------------//
 
 
 #endif // GRAPHICS_H

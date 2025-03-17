@@ -2,24 +2,24 @@
 #define RENDERER_H
 
 #include "../globals.h"
-#include "../vulkan/vkContext.h"
+#include "../context.h"
 
 #include "renderPass.h"
-#include "descriptorSet.h"
-#include "graphics.h"
+#include "swapchain.h"
+#include "pipeline.h"
 
-struct Renderer {
-    VkCommandPool commandPool;
-    std::vector<VkCommandBuffer> commandBuffers;
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderFinishedSemaphore;
-    VkFence inFlightFence;
+class Renderer {
+    public:
+        VkResult init(Context& context, GLFWwindow* window);
+        void cleanup(Context& context);
+        void draw();
 
-    Graphics graphics;
+
+    private:
+        SwapChain swapChain;
+        RenderPass renderPass;
+        Pipeline pipeline;
+        
 };
-
-VkResult initializeRenderer(Renderer& renderer, VulkanContext context);
-
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 #endif // RENDERER_H

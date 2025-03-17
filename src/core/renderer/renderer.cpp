@@ -1,31 +1,41 @@
 #include "renderer.h"
+#include "shader.h"
+#include "pipeline.h"
 
-VkResult initializeRenderer(Renderer& renderer, VulkanContext context) {
+VkResult Renderer::init(Context& context, GLFWwindow* window) {
 
-    // initialize graphics
-    if (createRenderPass(context.physicalDevice, context.device, context.swapChainImageFormat, renderer.graphics.renderPass) != VK_SUCCESS) 
-    {
-        return VK_ERROR_INITIALIZATION_FAILED;
-    }
+    // setup swapchain and renderpass
+    swapChain.init(context, window);
+    renderPass.init(context, swapChain.swapChainImageFormat);
+    swapChain.createDepthResources(context);
+    swapChain.createFramebuffers(context, renderPass.get());
 
-    std::vector<VkDescriptorSetLayoutBinding> bindings;
-    bindings.push_back(createDescriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr));
-    bindings.push_back(createDescriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr));
+    // create descriptor set layout
+    VkDescriptorSetLayoutBinding uboLayoutBinding = createDescriptorSetLayoutBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, VK_SHADER_STAGE_VERTEX_BIT, nullptr);
+    VkDescriptorSetLayoutBinding samplerLayoutBinding = createDescriptorSetLayoutBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, VK_SHADER_STAGE_FRAGMENT_BIT, nullptr);
+    std::vector<VkDescriptorSetLayoutBinding> bindings = {uboLayoutBinding, samplerLayoutBinding};
+    createDescriptorSetLayout(context.device, bindings, pipeline.descriptorSetLayout);
 
-    if (createDescriptorSetLayout(context.device, bindings, renderer.graphics.descriptorSetLayout) != VK_SUCCESS) 
-    {
-        return VK_ERROR_INITIALIZATION_FAILED;
-    }
+    // create graphics pipeline
+    auto vertShaderCode = readFile("resources/shaders/shader.vert");
+    auto fragShaderCode = readFile("resources/shaders/shader.frag");
+    PipelineConfig pipelineConfig = {};
+    pipelineConfig.vertShaderModule = createShaderModule(vertShaderCode, context.device);
+    pipelineConfig.fragShaderModule = createShaderModule(vertShaderCode, context.device);
+    pipelineConfig.vertexInput = getVertexInput();
+    pipelineConfig.inputAssembly = getInputAssembly();
+    pipelineConfig.viewportState = getViewportState();
+    pipelineConfig.rasterizer = getRasterizer();
+    pipelineConfig.multisampling = getMultisampling();
+    pipelineConfig.colorBlending = getColorBlending();
+    pipelineConfig.depthStencil = getDepthStencil();
+    pipelineConfig.renderPass = renderPass.get();
+    pipeline.init(context, GRAPHICS_PIPELINE, pipelineConfig);
 
-    std::vector<std::string> shaderPaths = {"resources/shaders/vert.spv", "resources/shaders/frag.spv"};
-    if (createGraphicsPipeline(context.device, renderer.graphics, shaderPaths) != VK_SUCCESS) 
-    {
-        return VK_ERROR_INITIALIZATION_FAILED;
-    }
+}
 
-    return VK_SUCCESS;
-};
-
-void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-
-};
+void Renderer::cleanup(Context& context) {
+    pipeline.cleanup(context);
+    renderPass.cleanup(context);
+    swapChain.cleanup(context);
+}

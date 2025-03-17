@@ -16,62 +16,85 @@ void App::run()
 
 void App::init()
 {
-    // Initialize the window
-    if (!glfwInit()) {
-        throw std::runtime_error("Failed to initialize GLFW");
+    if (m_window.init(WIDTH, HEIGHT, TITLE) != GLFW_TRUE) {
+        throw std::runtime_error("creating window failed!");
     }
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-    // Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(WIDTH, HEIGHT, "vkApp", NULL, NULL);
-    if (!window) {
-        glfwTerminate();
-        throw std::runtime_error("Failed to create GLFW window");
+    if (m_context.init(m_window.get()) != VK_SUCCESS ) {
+        throw std::runtime_error("creating context failed!");
+    }
+    if (m_renderer.init(m_context, m_window.get()) != VK_SUCCESS) {
+        throw std::runtime_error("creating renderer failed!");
     }
 
-    // Initialize the Vulkan context
-    if(initializeVulkanContext(m_context, window) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to initialize Vulkan context");
-    }
-
-    // Initialize the Renderer
-    if(initializeRenderer(m_renderer, m_context) != VK_SUCCESS) {
-        throw std::runtime_error("Failed to initialize Renderer");
-    }
-
-    // Create command pool
-    // Create depth resources
-    // Create framebuffers
-    // Create texture image
-    // Create texture image view
-    // Create texture sampler
-    // Load model
-    // Create vertex buffer
-    // Create index buffer
-    // Create uniform buffers
-    // Create descriptor pool
-    // Create descriptor sets
-    // Create command buffers
-    // Create sync objects
 }
 
 void App::cleanup()
 {
-    cleanupVulkanContext(m_context);
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    m_renderer.cleanup(m_context);
+    m_context.cleanup();
+    m_window.cleanup();
 }
 
 void App::loop()
 {
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(m_window.get()))
     {
         glfwPollEvents();
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(m_window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
+            glfwSetWindowShouldClose(m_window.get(), GLFW_TRUE);
         }
-        // draw();
-        // update();
+
+
+
+        
+        /*
+        goal architecture
+        m_window.update();                  << check for resizing and closing
+        m_control.update(m_window);         << handles user input
+        m_events.update(m_control);         << handles state updates (editing & adding entities and components)
+        m_simulation.update(m_events);      << update world simulation (run systems on components)
+        m_renderer.update(m_simulation);    << update compute buffers & render graphics
+
+        if (editorOn) {
+            editor.update();                << handles editor state updates
+        }
+        */
     }
 }
+
+
+/*
+
+// pseudocode
+update()
+{
+    // logic (input & events)
+    vkWaitForFences();
+    if (editorOn) {
+        editor.update();
+    }
+    >> eventQueue? << 
+    updateLogic();
+    VkResetFences();
+
+    // compute
+    vkWaitForFences();
+    updateBuffers();
+    vkResetFences();
+    recordComputeCommandBuffer();
+    vkQueueSubmit(computeQueue); << semaphores
+
+    // graphics
+    vkWaitForFences();
+    acquireNextImage();
+    >> recreateSwapChain
+    vkResetFences();
+    recordGraphicsCommandBuffer();
+    vkQueueSubmit(graphicsQueue); << semaphores
+
+    vkQueuePresent(presentQueue) << semaphores
+    >> recreateSwapChain
+}
+
+*/

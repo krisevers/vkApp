@@ -18,16 +18,23 @@ class App
         // void onResize(int width, int height) final;
 
     private:
-        GLFWwindow* window;
-        VulkanContext m_context;
-
+        Window m_window;
+        Context m_context;
         Renderer m_renderer;
+
+        std::unique_ptr<VkDescriptorPool> descriptorPool{};
+
+        // std::queue<Pipeline> pipelines;
+        // std::queue<Command> commands;
+
+
 
         // void createVertices();
         // void createUniformBuffer();
         // void createPipelines();
         // void createCommandBuffer();
 
+        bool editorOn = true;
         float m_elapsedTime = 0.0f;
 
 };

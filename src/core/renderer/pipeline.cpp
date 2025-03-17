@@ -1,39 +1,43 @@
-#include "graphics.h"
-#include "shader.h"
+#include "pipeline.h"
 
-VkResult createGraphicsPipeline( VkDevice device, Graphics& graphics, const std::vector<std::string>& shaderPaths ) {
-    auto vertShaderCode = readFile(shaderPaths[0]);
-    auto fragShaderCode = readFile(shaderPaths[1]);
+VkResult Pipeline::init(Context& context, PipelineType type, PipelineConfig& config) {
 
-    VkShaderModule vertShaderModule = createShaderModule(vertShaderCode, device);
-    VkShaderModule fragShaderModule = createShaderModule(fragShaderCode, device);
+    if (type == GRAPHICS_PIPELINE) {
+        if (createGraphicsPipeline(context, config) != VK_SUCCESS) {
+            throw std::runtime_error("unable to create graphics pipeline!");
+        }
+    }
+    if (type == COMPUTE_PIPELINE) {
+        if (createComputePipeline(context, config) != VK_SUCCESS) {
+            throw std::runtime_error("unable to create compute pipeline!");
+        }
+    }
 
+    return VK_SUCCESS;
+}
+
+void Pipeline::cleanup(Context& context) {
+    vkDestroyDescriptorSetLayout(context.device, descriptorSetLayout, nullptr);
+    vkDestroyPipeline(context.device, pipeline, nullptr);
+    vkDestroyPipelineLayout(context.device, pipelineLayout, nullptr);
+}
+
+//----------------------------------------------------------------//
+
+VkResult Pipeline::createGraphicsPipeline(Context& context, PipelineConfig& config) {
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.module = config.vertShaderModule;
     vertShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
     fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.module = config.fragShaderModule;
     fragShaderStageInfo.pName = "main";
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
-
-    // auto pipelineLayoutInfo = getPipelineLayoutInfo(graphics.descriptorSetLayout);
-    // if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &graphics.pipelineLayout) != VK_SUCCESS) {
-    //     throw std::runtime_error("failed to create pipeline layout!");
-    // }
-
-    auto vertexInputInfo = getVertexInput();
-    auto inputAssembly = getInputAssembly();
-    auto viewportState = getViewportState();
-    auto rasterizer = getRasterizer();
-    auto multisampling = getMultisampling();
-    auto colorBlending = getColorBlending();
-    auto depthStencil = getDepthStencil();
 
     std::vector<VkDynamicState> dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
@@ -47,10 +51,10 @@ VkResult createGraphicsPipeline( VkDevice device, Graphics& graphics, const std:
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &graphics.descriptorSetLayout;
+    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &graphics.pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(context.device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -58,36 +62,33 @@ VkResult createGraphicsPipeline( VkDevice device, Graphics& graphics, const std:
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStages;
-    pipelineInfo.pVertexInputState = &vertexInputInfo;
-    pipelineInfo.pInputAssemblyState = &inputAssembly;
-    pipelineInfo.pViewportState = &viewportState;
-    pipelineInfo.pRasterizationState = &rasterizer;
-    pipelineInfo.pMultisampleState = &multisampling;
-    pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.pVertexInputState = &config.vertexInput;
+    pipelineInfo.pInputAssemblyState = &config.inputAssembly;
+    pipelineInfo.pViewportState = &config.viewportState;
+    pipelineInfo.pRasterizationState = &config.rasterizer;
+    pipelineInfo.pMultisampleState = &config.multisampling;
+    pipelineInfo.pColorBlendState = &config.colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
-    pipelineInfo.pDepthStencilState = &depthStencil;
-    pipelineInfo.layout = graphics.pipelineLayout;
-    pipelineInfo.renderPass = graphics.renderPass;
+    pipelineInfo.pDepthStencilState = &config.depthStencil;
+    pipelineInfo.layout = pipelineLayout;
+    if (!config.renderPass.has_value()) {
+        throw std::runtime_error("render pass is not set!");
+    }
+    pipelineInfo.renderPass = config.renderPass.value();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphics.pipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(context.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
-    vkDestroyShaderModule(device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(device, vertShaderModule, nullptr);
-
-    return VK_SUCCESS;
+    vkDestroyShaderModule(context.device, config.fragShaderModule, nullptr);
+    vkDestroyShaderModule(context.device, config.vertShaderModule, nullptr);
 }
 
-void cleanupGraphicsPipeline(VkDevice device, Graphics& graphics) {
-    vkDestroyDescriptorSetLayout(device, graphics.descriptorSetLayout, nullptr);
-    vkDestroyPipeline(device, graphics.pipeline, nullptr);
-    vkDestroyPipelineLayout(device, graphics.pipelineLayout, nullptr);
-    vkDestroyRenderPass(device, graphics.renderPass, nullptr);
+VkResult Pipeline::createComputePipeline(Context& context, PipelineConfig& config) {
+    
 }
-
 
 //----------------------------------------------------------------//
 

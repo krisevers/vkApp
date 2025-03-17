@@ -3,12 +3,20 @@
 
 #include "../globals.h"
 
-VkResult createRenderPass(VkPhysicalDevice physicalDevice, VkDevice device, VkFormat swapChainImageFormat, VkRenderPass& renderPass);
-void cleanupRenderPass(VkDevice device, VkRenderPass renderPass);
+#include "swapchain.h"
 
-//----------------------------------------------------------------//
+class RenderPass {
+    public:
+        VkResult init(Context& context, VkFormat swapChainImageFormat);
+        void cleanup(Context& context);
 
-VkFormat findDepthFormat(VkPhysicalDevice physicalDevice);
-VkFormat findSupportedFormat(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+        VkRenderPass get() {
+            return renderPass;
+        }
+
+    private:
+        VkRenderPass renderPass;
+};
+
 
 #endif // RENDERPASS_H
