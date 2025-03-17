@@ -84,10 +84,13 @@ VkResult Pipeline::createGraphicsPipeline(Context& context, PipelineConfig& conf
 
     vkDestroyShaderModule(context.device, config.fragShaderModule, nullptr);
     vkDestroyShaderModule(context.device, config.vertShaderModule, nullptr);
+
+    return VK_SUCCESS;
 }
 
 VkResult Pipeline::createComputePipeline(Context& context, PipelineConfig& config) {
     
+    return VK_SUCCESS;
 }
 
 //----------------------------------------------------------------//

@@ -3,6 +3,10 @@
 
 #include "core/core.h"
 
+#include <memory>
+#include <chrono>
+#include <thread>
+
 class App
 {
     public:

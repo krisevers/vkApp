@@ -3,6 +3,8 @@
 VkResult SwapChain::init(Context& context, GLFWwindow* window) {
     createSwapChain(context, window);
     createImageViews(context);
+
+    return VK_SUCCESS;
 }
 
 void SwapChain::cleanup(Context& context) {
@@ -36,6 +38,8 @@ VkResult SwapChain::recreate(Context& context, GLFWwindow* window, VkRenderPass 
     createImageViews(context);
     createDepthResources(context);
     createFramebuffers(context, renderPass);
+
+    return VK_SUCCESS;
 }
 
 //----------------------------------------------------------------//
@@ -109,6 +113,8 @@ VkResult SwapChain::createDepthResources(Context& context) {
     VkFormat depthFormat = findDepthFormat(context.physicalDevice);
     createImage(context.device, context.physicalDevice, swapChainExtent.width, swapChainExtent.height, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
     depthImageView = createImageView(context.device, depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    return VK_SUCCESS;
 }
 
 VkResult SwapChain::createFramebuffers(Context& context, VkRenderPass renderPass) {
@@ -133,6 +139,8 @@ VkResult SwapChain::createFramebuffers(Context& context, VkRenderPass renderPass
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
+
+    return VK_SUCCESS;
 }
 
 //----------------------------------------------------------------//

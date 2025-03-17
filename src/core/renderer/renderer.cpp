@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "shader.h"
 #include "pipeline.h"
+#include "descriptorSetLayout.h"
 
 VkResult Renderer::init(Context& context, GLFWwindow* window) {
 
@@ -32,6 +33,7 @@ VkResult Renderer::init(Context& context, GLFWwindow* window) {
     pipelineConfig.renderPass = renderPass.get();
     pipeline.init(context, GRAPHICS_PIPELINE, pipelineConfig);
 
+    return VK_SUCCESS;
 }
 
 void Renderer::cleanup(Context& context) {
