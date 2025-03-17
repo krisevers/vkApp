@@ -4,7 +4,6 @@
 #include "../globals.h"
 #include "../context.h"
 #include "renderPass.h"
-#include "descriptor.h"
 
 enum PipelineType {
     GRAPHICS_PIPELINE,
