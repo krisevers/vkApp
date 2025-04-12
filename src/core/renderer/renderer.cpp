@@ -18,8 +18,8 @@ VkResult Renderer::init(Context& context, GLFWwindow* window) {
     createDescriptorSetLayout(context.device, bindings, pipeline.descriptorSetLayout);
 
     // create graphics pipeline
-    auto vertShaderCode = readFile("resources/shaders/shader.vert");
-    auto fragShaderCode = readFile("resources/shaders/shader.frag");
+    auto vertShaderCode = readFile("resources/shaders/vert.spv");
+    auto fragShaderCode = readFile("resources/shaders/frag.spv");
     PipelineConfig pipelineConfig = {};
     pipelineConfig.vertShaderModule = createShaderModule(vertShaderCode, context.device);
     pipelineConfig.fragShaderModule = createShaderModule(vertShaderCode, context.device);

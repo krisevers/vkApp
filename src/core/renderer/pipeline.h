@@ -14,8 +14,7 @@ struct PipelineConfig {
     PipelineConfig(const PipelineConfig&) = delete;
     PipelineConfig& operator=(const PipelineConfig&) = delete;
 
-    std::optional<VkRenderPass> renderPass = std::nullopt;
-
+    VkRenderPass renderPass;
     VkShaderModule vertShaderModule;
     VkShaderModule fragShaderModule;
     VkPipelineVertexInputStateCreateInfo vertexInput{};

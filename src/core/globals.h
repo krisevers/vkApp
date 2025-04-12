@@ -33,7 +33,6 @@ const bool enableValidationLayers = false;
 
 const uint32_t WIDTH  = 1920;
 const uint32_t HEIGHT = 1080;
-const char* TITLE = "vkApp";
 
 //----------------------------------------------------------------//
 

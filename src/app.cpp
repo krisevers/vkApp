@@ -16,7 +16,7 @@ void App::run()
 
 void App::init()
 {
-    if (m_window.init(WIDTH, HEIGHT, TITLE) != GLFW_TRUE) {
+    if (m_window.init(WIDTH, HEIGHT, "vkApp") != GLFW_TRUE) {
         throw std::runtime_error("creating window failed!");
     }
     if (m_context.init(m_window.get()) != VK_SUCCESS ) {
